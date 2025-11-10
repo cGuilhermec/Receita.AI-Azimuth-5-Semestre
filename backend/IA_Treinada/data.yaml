@@ -1,0 +1,19 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 39
+names: [
+  'Apple', 'Arroz', 'Bacon', 'Baked-patatos', 'Banana', 'Batata-frita', 'Bife', 
+  'Biscuits', 'Blue-cheese', 'Brocoli', 'Burritos', 'Carrots', 'Chicken-wings', 
+  'Chips', 'Beans', 'Copo-agua', 'Eggs', 'Feijao', 'File-peixe', 'Fried-eggs', 
+  'Hamburgers', 'Lasagna', 'Lasanha', 'Milho', 'Ovos', 'Peixe', 'Pizza', 'Piza', 
+  'Queijos', 'Rice', 'Roasted-corn', 'Saladas', 'Salads', 'Sandwich', 'Sushi', 'Water'
+]
+
+roboflow:
+  workspace: food-tlity
+  project: food-detection-sirni
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/food-tlity/food-detection-sirni/dataset/2
