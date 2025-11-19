@@ -87,15 +87,42 @@ class UserController {
 
   // Atualizar usuário
   async updateUser(req: Request, res: Response) {
-    const { id, ...updateData } = req.body;
+    const userId = (req as any).user.id; // Pega o ID do usuário do middleware de autenticação
+    const updateData = req.body; // Dados para atualizar
 
     try {
-      const updatedUser = await this.userService.updateUser(id, updateData);
+      const updatedUser = await this.userService.updateUser(userId, updateData);
       return res.status(200).json(updatedUser);
     } catch (error) {
       console.error("Erro ao atualizar usuário:", (error as Error).message);
       return res.status(500).json({
         message: "Erro ao atualizar usuário",
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  // Buscar perfil completo do usuário
+  async getUserProfile(req: Request, res: Response) {
+    const userId = (req as any).user.id; // Pega o ID do usuário do middleware de autenticação
+
+    try {
+      const userProfile = await this.userService.getUserProfile(userId);
+
+      if (!userProfile) {
+        return res
+          .status(404)
+          .json({ message: "Perfil do usuário não encontrado" });
+      }
+
+      return res.status(200).json(userProfile);
+    } catch (error) {
+      console.error(
+        "Erro ao buscar perfil do usuário:",
+        (error as Error).message
+      );
+      return res.status(500).json({
+        message: "Erro ao buscar perfil do usuário",
         error: (error as Error).message,
       });
     }

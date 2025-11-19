@@ -1,3 +1,4 @@
+// components/api/api.ts
 import axios, { AxiosInstance } from "axios";
 
 export const api: AxiosInstance = axios.create({
@@ -5,4 +6,5 @@ export const api: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Adicione esta linha
 });

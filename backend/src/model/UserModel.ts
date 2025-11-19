@@ -55,9 +55,6 @@ export class UserModel {
   }
 
   async getUserInfo(userId: string) {
-    console.log(`🔍 [USER MODEL] Buscando usuário com ID: ${userId}`);
-    console.log(`🔍 [USER MODEL] Tipo do ID: ${typeof userId}`);
-
     let user;
 
     // Tenta buscar por _id primeiro (se for um ObjectId válido)
@@ -72,27 +69,17 @@ export class UserModel {
     // Se não encontrou por _id, tenta por email ou outro campo
     if (!user) {
       user = await User.findOne({ email: userId });
-      console.log(
-        `🔍 [USER MODEL] Busca por email:`,
-        user ? "Encontrado" : "Não encontrado"
-      );
     }
 
     // Se ainda não encontrou, tenta por name
     if (!user) {
       user = await User.findOne({ name: userId });
-      console.log(
-        `🔍 [USER MODEL] Busca por name:`,
-        user ? "Encontrado" : "Não encontrado"
-      );
     }
 
     if (!user) {
       console.log(`❌ [USER MODEL] Usuário não encontrado com nenhum critério`);
       throw new Error("User not found");
     }
-
-    console.log(`✅ [USER MODEL] Usuário encontrado:`, user);
 
     // Retorna apenas os campos relevantes
     const {
@@ -122,5 +109,23 @@ export class UserModel {
       hypertension,
       allergies,
     };
+  }
+
+  async getUserProfile(userId: string) {
+    let user;
+
+    if (mongoose.Types.ObjectId.isValid(userId)) {
+      user = await User.findById(userId);
+    }
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Retorna todos os campos exceto a senha
+    const userObject = user.toObject();
+    const { password, __v, ...userProfile } = userObject;
+
+    return userProfile;
   }
 }
