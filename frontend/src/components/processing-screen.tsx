@@ -1,24 +1,39 @@
-import { useEffect, useState } from 'react';
-import { Button } from './ui/button';
+// components/processing-screen.tsx
+import { useEffect, useState } from "react";
+import { Button } from "./ui/button";
+import { useRecipeGeneration } from "../hooks/useRecipeGeneration";
 
 interface ProcessingScreenProps {
-  onComplete: () => void;
+  onComplete: (recipes: any[]) => void;
+  ingredients: string[];
+  imageDataUrls: string[];
 }
 
 const loadingMessages = [
-  'Analisando ingredientes...',
-  'Identificando sabores e aromas...',
-  'Aquecendo a IA culinária...',
-  'Gerando receitas personalizadas...',
-  'Combinando ingredientes...',
-  'Quase pronto...',
+  "Analisando ingredientes...",
+  "Identificando sabores e aromas...",
+  "Consultando a IA culinária...",
+  "Gerando receitas personalizadas...",
+  "Combinando ingredientes...",
+  "Quase pronto...",
 ];
 
-export function ProcessingScreen({ onComplete }: ProcessingScreenProps) {
+export function ProcessingScreen({
+  onComplete,
+  ingredients,
+  imageDataUrls,
+}: ProcessingScreenProps) {
   const [messageIndex, setMessageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const { generateRecipes, generatedRecipes, isGenerating } =
+    useRecipeGeneration();
 
   useEffect(() => {
+    // Inicia a geração de receitas assim que o componente monta
+    if (ingredients.length > 0) {
+      generateRecipes(ingredients, imageDataUrls);
+    }
+
     const messageTimer = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % loadingMessages.length);
     }, 2500);
@@ -26,22 +41,32 @@ export function ProcessingScreen({ onComplete }: ProcessingScreenProps) {
     const progressTimer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
+          clearInterval(progressTimer);
           return 100;
         }
-        return prev + 10;
+        return prev + 2; // Progresso mais lento para IA real
       });
-    }, 400);
-
-    const completeTimer = setTimeout(() => {
-      onComplete();
-    }, 4500);
+    }, 200);
 
     return () => {
       clearInterval(messageTimer);
       clearInterval(progressTimer);
-      clearTimeout(completeTimer);
     };
-  }, [onComplete]);
+  }, [ingredients, imageDataUrls, generateRecipes]);
+
+  // Quando as receitas forem geradas, chama onComplete
+  useEffect(() => {
+    if (generatedRecipes.length > 0 && !isGenerating) {
+      setTimeout(() => {
+        onComplete(generatedRecipes);
+      }, 1000);
+    }
+  }, [generatedRecipes, isGenerating, onComplete]);
+
+  const handleCancel = () => {
+    // Poderia adicionar lógica para cancelar a requisição da IA
+    onComplete([]);
+  };
 
   return (
     <div className="fixed inset-0 bg-gradient-to-b from-white to-[#FFF5F2] flex flex-col items-center justify-center p-8">
@@ -59,6 +84,11 @@ export function ProcessingScreen({ onComplete }: ProcessingScreenProps) {
           <p className="text-xl text-[#343A40] animate-pulse">
             {loadingMessages[messageIndex]}
           </p>
+          {isGenerating && (
+            <p className="text-sm text-[#6C757D]">
+              Gerando receitas com {ingredients.length} ingredientes...
+            </p>
+          )}
         </div>
 
         {/* Progress Bar */}
@@ -69,12 +99,15 @@ export function ProcessingScreen({ onComplete }: ProcessingScreenProps) {
               style={{ width: `${progress}%` }}
             ></div>
           </div>
+          <p className="text-xs text-[#6C757D] text-center mt-2">
+            {progress}% completo
+          </p>
         </div>
 
         {/* Cancel Button */}
         <Button
           variant="ghost"
-          onClick={onComplete}
+          onClick={handleCancel}
           className="text-[#6C757D] hover:text-[#343A40] mt-8"
         >
           Cancelar

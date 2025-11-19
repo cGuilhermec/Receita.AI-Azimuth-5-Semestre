@@ -83,4 +83,18 @@ export class UserService {
     const { password, _id, __v, ...response } = user;
     return response;
   }
+
+  // Buscar perfil completo do usuário
+  async getUserProfile(id: string) {
+    const userDoc = await this.userModel.findUserById(id);
+    if (!userDoc) {
+      throw new Error("User not found");
+    }
+
+    const user = userDoc.toObject();
+
+    // Remover campos sensíveis antes de retornar
+    const { password, _id, __v, ...profile } = user;
+    return profile;
+  }
 }

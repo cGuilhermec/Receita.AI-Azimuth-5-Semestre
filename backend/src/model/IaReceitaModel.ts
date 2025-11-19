@@ -30,7 +30,7 @@ export const IaReceitaMongooseModel = mongoose.model<IIaReceita>(
 );
 
 export class IaReceitaModel {
-  async createIaReceita(data: IIaReceita) {
+  async createIaReceita(data: Partial<IIaReceita>) {
     return IaReceitaMongooseModel.create(data);
   }
 
@@ -40,5 +40,9 @@ export class IaReceitaModel {
 
   async findById(id: string) {
     return IaReceitaMongooseModel.findById(id);
+  }
+
+  async deleteById(id: string) {
+    return IaReceitaMongooseModel.findByIdAndDelete(id);
   }
 }

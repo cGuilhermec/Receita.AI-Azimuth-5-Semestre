@@ -1,23 +1,25 @@
-import { useState } from 'react';
-import { ChefHat, Eye, EyeOff, ArrowLeft, AlertCircle } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+// components/login-screen.tsx
+import { useState } from "react";
+import { ChefHat, Eye, EyeOff, ArrowLeft, AlertCircle } from "lucide-react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { useAuth } from "../hooks/useAuth";
 
 interface LoginScreenProps {
   onBack: () => void;
   onLoginSuccess: () => void;
+  onRegister: () => void; // Adicione esta prop
 }
 
-export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export function LoginScreen({ onBack, onLoginSuccess, onRegister }: LoginScreenProps) {
+  const { login, isLoading, error, clearError } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{
     email?: string;
     password?: string;
-    general?: string;
   }>({});
   const [touched, setTouched] = useState<{
     email?: boolean;
@@ -27,54 +29,55 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
   // Validação de e-mail
   const validateEmail = (value: string) => {
     if (!value) {
-      return 'E-mail é obrigatório';
+      return "E-mail é obrigatório";
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(value)) {
-      return 'Digite um e-mail válido';
+      return "Digite um e-mail válido";
     }
-    return '';
+    return "";
   };
 
-  // Validação de senha
+  // Validação de senha - REMOVIDA A VALIDAÇÃO DE MÍNIMO DE CARACTERES
   const validatePassword = (value: string) => {
     if (!value) {
-      return 'Senha é obrigatória';
+      return "Senha é obrigatória";
     }
-    if (value.length < 6) {
-      return 'A senha deve ter no mínimo 6 caracteres';
-    }
-    return '';
+    return "";
   };
 
-  // Handler para blur (quando o campo perde foco)
-  const handleBlur = (field: 'email' | 'password') => {
+  // Handler para blur
+  const handleBlur = (field: "email" | "password") => {
     setTouched({ ...touched, [field]: true });
-    
-    if (field === 'email') {
+
+    if (field === "email") {
       const emailError = validateEmail(email);
       setErrors({ ...errors, email: emailError });
-    } else if (field === 'password') {
+    } else if (field === "password") {
       const passwordError = validatePassword(password);
       setErrors({ ...errors, password: passwordError });
     }
   };
 
   // Handler para mudança no input
-  const handleChange = (field: 'email' | 'password', value: string) => {
-    if (field === 'email') {
+  const handleChange = (field: "email" | "password", value: string) => {
+    if (field === "email") {
       setEmail(value);
-      // Limpa erro quando o usuário começa a digitar
       if (touched.email) {
         const emailError = validateEmail(value);
         setErrors({ ...errors, email: emailError });
       }
-    } else if (field === 'password') {
+    } else if (field === "password") {
       setPassword(value);
       if (touched.password) {
         const passwordError = validatePassword(value);
         setErrors({ ...errors, password: passwordError });
       }
+    }
+
+    // Limpa erros gerais quando o usuário começa a digitar
+    if (error) {
+      clearError();
     }
   };
 
@@ -97,25 +100,13 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
       return;
     }
 
-    // Simula login
-    setIsLoading(true);
-    setErrors({});
-
-    // Em uma aplicação real, aqui faria a chamada para API
-    setTimeout(() => {
-      // Simula erro de credenciais inválidas (exemplo)
-      // Para demonstração, vamos aceitar qualquer login válido
-      const mockSuccess = true; // Altere para false para testar erro
-
-      if (mockSuccess) {
-        onLoginSuccess();
-      } else {
-        setErrors({
-          general: 'E-mail ou senha incorretos. Tente novamente.',
-        });
-      }
-      setIsLoading(false);
-    }, 1500);
+    try {
+      await login({ email, password });
+      onLoginSuccess(); // Só chama se o login for bem-sucedido
+    } catch (err) {
+      // O erro já é tratado pelo hook useAuth
+      console.error("Erro no login:", err);
+    }
   };
 
   return (
@@ -127,6 +118,7 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
             onClick={onBack}
             className="touch-target flex items-center justify-center w-[44px] h-[44px] rounded-lg hover:bg-[#F8F9FA] transition-interactive focus-ring"
             aria-label="Voltar"
+            disabled={isLoading}
           >
             <ArrowLeft className="w-6 h-6 text-[#343A40]" />
           </button>
@@ -149,11 +141,11 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
               </p>
             </div>
 
-            {/* Mensagem de erro geral */}
-            {errors.general && (
+            {/* Mensagem de erro geral do hook useAuth */}
+            {error && (
               <div className="flex items-start gap-3 p-4 bg-[#DC3545]/10 border border-[#DC3545]/20 rounded-lg animate-fade-in">
                 <AlertCircle className="w-5 h-5 text-[#DC3545] flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-[#DC3545]">{errors.general}</p>
+                <p className="text-sm text-[#DC3545]">{error}</p>
               </div>
             )}
 
@@ -169,19 +161,26 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
                   type="email"
                   placeholder="seu@email.com"
                   value={email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  onBlur={() => handleBlur('email')}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                  onBlur={() => handleBlur("email")}
                   className={`w-full h-[44px] px-4 bg-[#F8F9FA] border rounded-lg transition-interactive focus-ring ${
                     errors.email && touched.email
-                      ? 'border-[#DC3545] focus:border-[#DC3545]'
-                      : 'border-transparent focus:border-[#FF6B35]'
+                      ? "border-[#DC3545] focus:border-[#DC3545]"
+                      : "border-transparent focus:border-[#FF6B35]"
                   }`}
                   disabled={isLoading}
-                  aria-invalid={errors.email && touched.email ? 'true' : 'false'}
-                  aria-describedby={errors.email && touched.email ? 'email-error' : undefined}
+                  aria-invalid={
+                    errors.email && touched.email ? "true" : "false"
+                  }
+                  aria-describedby={
+                    errors.email && touched.email ? "email-error" : undefined
+                  }
                 />
                 {errors.email && touched.email && (
-                  <div className="flex items-center gap-2 animate-fade-in" id="email-error">
+                  <div
+                    className="flex items-center gap-2 animate-fade-in"
+                    id="email-error"
+                  >
                     <AlertCircle className="w-4 h-4 text-[#DC3545]" />
                     <p className="text-sm text-[#DC3545]">{errors.email}</p>
                   </div>
@@ -196,25 +195,33 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     placeholder="Digite sua senha"
                     value={password}
-                    onChange={(e) => handleChange('password', e.target.value)}
-                    onBlur={() => handleBlur('password')}
+                    onChange={(e) => handleChange("password", e.target.value)}
+                    onBlur={() => handleBlur("password")}
                     className={`w-full h-[44px] px-4 pr-12 bg-[#F8F9FA] border rounded-lg transition-interactive focus-ring ${
                       errors.password && touched.password
-                        ? 'border-[#DC3545] focus:border-[#DC3545]'
-                        : 'border-transparent focus:border-[#FF6B35]'
+                        ? "border-[#DC3545] focus:border-[#DC3545]"
+                        : "border-transparent focus:border-[#FF6B35]"
                     }`}
                     disabled={isLoading}
-                    aria-invalid={errors.password && touched.password ? 'true' : 'false'}
-                    aria-describedby={errors.password && touched.password ? 'password-error' : undefined}
+                    aria-invalid={
+                      errors.password && touched.password ? "true" : "false"
+                    }
+                    aria-describedby={
+                      errors.password && touched.password
+                        ? "password-error"
+                        : undefined
+                    }
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 touch-target flex items-center justify-center w-[44px] h-[44px] text-[#6C757D] hover:text-[#343A40] transition-interactive focus-ring rounded"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    aria-label={
+                      showPassword ? "Ocultar senha" : "Mostrar senha"
+                    }
                     disabled={isLoading}
                   >
                     {showPassword ? (
@@ -225,7 +232,10 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
                   </button>
                 </div>
                 {errors.password && touched.password && (
-                  <div className="flex items-center gap-2 animate-fade-in" id="password-error">
+                  <div
+                    className="flex items-center gap-2 animate-fade-in"
+                    id="password-error"
+                  >
                     <AlertCircle className="w-4 h-4 text-[#DC3545]" />
                     <p className="text-sm text-[#DC3545]">{errors.password}</p>
                   </div>
@@ -233,18 +243,20 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
               </div>
 
               {/* Link Esqueceu a senha */}
-              <div className="flex justify-end">
+              {/* <div className="flex justify-end">
                 <button
                   type="button"
                   className="text-[#FF6B35] hover:text-[#FF6B35]/90 hover:underline transition-interactive focus-ring rounded px-2 py-1"
                   onClick={() => {
-                    // Em uma aplicação real, navegaria para tela de recuperação de senha
-                    alert('Funcionalidade de recuperação de senha em desenvolvimento');
+                    alert(
+                      "Funcionalidade de recuperação de senha em desenvolvimento"
+                    );
                   }}
+                  disabled={isLoading}
                 >
                   Esqueceu a senha?
                 </button>
-              </div>
+              </div> */}
 
               {/* Botão Entrar */}
               <Button
@@ -258,7 +270,7 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
                     <span>Entrando...</span>
                   </div>
                 ) : (
-                  'Entrar'
+                  "Entrar"
                 )}
               </Button>
             </form>
@@ -266,10 +278,11 @@ export function LoginScreen({ onBack, onLoginSuccess }: LoginScreenProps) {
             {/* Link para criar conta */}
             <div className="text-center pt-4">
               <p className="text-[#6C757D]">
-                Não tem uma conta?{' '}
+                Não tem uma conta?{" "}
                 <button
-                  onClick={onBack}
+                  onClick={onRegister} // Mude de onBack para onRegister
                   className="text-[#FF6B35] hover:text-[#FF6B35]/90 hover:underline transition-interactive focus-ring rounded px-1"
+                  disabled={isLoading}
                 >
                   Criar conta
                 </button>
