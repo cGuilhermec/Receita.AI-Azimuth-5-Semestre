@@ -1,0 +1,7 @@
+export default {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  collectCoverageFrom: ['src/**/*.ts'],
+  coverageDirectory: 'coverage'
+};
