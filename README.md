@@ -130,14 +130,3 @@ npx react-native run-ios
 ## 👨‍💻 Equipe de Desenvolvimento
 - **Gustavo Carvalho** – Desenvolvimento Mobile / Integração de IA  
 - (adicionar os outros membros)
-
----
-
-## 📄 Licença
-Este projeto foi desenvolvido para fins educacionais.  
-Você pode utilizá-lo como referência ou base para estudos.
-
----
-
-## 📬 Contato
-Se quiser que eu personalize ainda mais o README, gere uma versão com imagens ou adapte para o seu código real, basta me enviar o **ZIP do projeto**.  
