@@ -1,10 +1,10 @@
 # 🍽️ Receita.AI  
-### _Aplicativo móvel em React Native para identificar alimentos via foto e gerar receitas automaticamente_
+### _Aplicativo móvel em React Vite para identificar alimentos via foto e gerar receitas automaticamente_
 
 ---
 
 ## 📌 Sobre o Projeto
-O **Receita.AI** é um aplicativo desenvolvido em **React Native** como projeto acadêmico do 5º semestre.  
+O **Receita.AI** é um aplicativo desenvolvido em **React Vite** como projeto acadêmico do 5º semestre.  
 O objetivo do aplicativo é permitir que o usuário **fotografe os alimentos presentes em sua geladeira**, e então o sistema utiliza técnicas de **reconhecimento de imagem** para identificar esses alimentos e sugerir **receitas inteligentes** com base neles.
 
 O projeto foi desenvolvido em **3 Sprints**, seguindo metodologia ágil, e inclui desde captura de imagem, reconhecimento de itens, até a geração das receitas.
@@ -30,7 +30,7 @@ O projeto foi desenvolvido em **3 Sprints**, seguindo metodologia ágil, e inclu
 ---
 
 ## 🛠️ Tecnologias Utilizadas
-- **React Native**
+- **React Vite**
 - Biblioteca de câmera: _preencher conforme o projeto real_  
 - Navegação: _React Navigation_ (ou outra usada)  
 - Processamento / reconhecimento de imagem: _API externa / modelo local_  
@@ -45,7 +45,7 @@ O projeto foi desenvolvido em **3 Sprints**, seguindo metodologia ágil, e inclu
 
 ### **Sprint 1 — 16/09/2025 → 02/10/2025**
 **Entrega principal:** Base do app e sistema de câmera  
-- Configuração inicial do ambiente React Native  
+- Configuração inicial do ambiente React Vite  
 - Estrutura de pastas  
 - Primeiras telas  
 - Implementação da captura de fotos  
@@ -109,10 +109,10 @@ Expo:
 expo start
 ```
 
-React Native CLI:
+React Vite CLI:
 ```
-npx react-native run-android
-npx react-native run-ios
+npx react-Vite run-android
+npx react-Vite run-ios
 ```
 
 ---
